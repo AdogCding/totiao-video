@@ -3,27 +3,53 @@ const path = require('path');
 const puppeteer = require('puppeteer-core')
 const pie = require("puppeteer-in-electron")
 const url = require("url");
+const buffer = require("buffer");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
 const initPuppeteer = async () => {
-  await pie.initialize(app);
+  return await pie.initialize(app);
 }
 
 const pieInit = initPuppeteer()
-
+if (!pieInit) {
+  app.quit()
+}
+const hiddenBackWindow = []
 const loadUrlOnBackend = (pBrowser) => {
   return async (evt, url) => {
+    if (hiddenBackWindow.length > 0) {
+      hiddenBackWindow.forEach(window => window.destroy())
+    }
     const backendWindow = new BrowserWindow({
       show:false
     })
-    console.log('url', url)
+    hiddenBackWindow.push(backendWindow)
+    const resourcesUrl = new Set()
+    backendWindow.webContents.openDevTools()
+    backendWindow.webContents.setAudioMuted(true)
     await backendWindow.loadURL(url)
-    const page = pie.getPage(pBrowser, backendWindow)
-    console.log(
-page    )
+    const page = await pie.getPage(pBrowser, backendWindow)
+    await page.setRequestInterception(true)
+    page.on('request', (req) => {
+      req.continue()
+    })
+    page.on('response', (rsp) => {
+      if (rsp.url().indexOf("video") !== -1) {
+        const rspHeader = rsp.headers()
+        const contentType = rspHeader['content-type']
+        if (contentType !== 'video/mp4') {
+          return
+        }
+        if (resourcesUrl.has(rsp.url())) {
+          return
+        }
+        resourcesUrl.add(rsp.url())
+        console.log('video', rsp.url())
+      }
+    })
   }
 } // 初始化puppeteer
 const createWindow =  () => {
