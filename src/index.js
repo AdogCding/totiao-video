@@ -75,7 +75,7 @@ const createWindow =  () => {
 app.on('ready', async () => {
   const pBrowser = await pie.connect(app, puppeteer)
   ipcMain.on('load-background-window', loadUrlOnBackend(pBrowser))
-  createWindow(pBrowser)
+  createWindow()
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
