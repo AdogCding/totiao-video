@@ -3,5 +3,5 @@
 const {contextBridge, ipcRenderer} = require('electron')
 
 contextBridge.exposeInMainWorld('pieApi', {
-    loadBackgroundWindow: (url) => ipcRenderer.send('load-background-window', url)
+    downloadVideoByPcUrl: (url) => ipcRenderer.invoke('video:downloadVideoByPcUrl', url)
 })
