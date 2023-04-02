@@ -8,14 +8,8 @@
 <body>
 <h1>今日头条视频下载器</h1>
 <div>
-    <label for="toutiao-share-url-input">
-        视频分享地址
-    </label><input type="text" id="toutiao-share-url-input" name="toutiao-share-url-input">
-    <button id="toutiao-share-url-sure-button">确定</button>
-</div>
-<div>
     <label for="toutiao-pc-url-input">
-        PC视频地址
+        视频地址
     </label><input type="text" id="toutiao-pc-url-input" name="toutiao-pc-url-input">
     <button id="toutiao-pc-url-sure-button">确定</button>
 </div>
@@ -23,24 +17,14 @@
 <script src="render.js"></script>
 <script type="text/javascript">
     const pcRow = {button:document.getElementById('toutiao-pc-url-sure-button'), input:document.getElementById('toutiao-pc-url-input')}
-    const shareRow = {button:document.getElementById('toutiao-share-url-sure-button'), input:document.getElementById('toutiao-share-url-input')}
     const {button:pcButton, input:pcInput} = pcRow
-    const {button:shareButton, input:shareInput} = shareRow
     pcButton.addEventListener('click', () => {
         const url = pcInput.value
-        if(!isPcUrl(url)) {
+        if(!isToutiaoUrl(url)) {
             window.alert("请输入PC端今日头条视频地址")
             return
         }
         downloadVideoByPcUrl(pcInput.value)
-    })
-    shareButton.addEventListener('click', () => {
-        const url = shareInput.value
-        if(!isPcUrl(url)) {
-            window.alert("请输入PC端今日头条视频地址")
-            return
-        }
-        downloadVideoByShareUrl(shareInput.value)
     })
 </script>
 </html>
