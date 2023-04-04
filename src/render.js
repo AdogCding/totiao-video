@@ -10,6 +10,14 @@ function isToutiaoUrl(urlStr) {
 }
 
 
-function downloadVideoByPcUrl(url) {
-    window.pieApi.downloadVideoByPcUrl(url)
+async function downloadVideoByPcUrl(url) {
+    return window.pieApi.downloadVideoByPcUrl(url)
+}
+
+async function changeVideoDownloadDirectory(location) {
+    return window.pieApi.changeVideoDownloadLocation(location)
+}
+
+async function chooseDirectory() {
+    return window.pieApi.chooseVideoDownloadFolder()
 }
