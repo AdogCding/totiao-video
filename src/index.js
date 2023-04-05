@@ -48,6 +48,7 @@ const createWindow = () => {
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
+    return mainWindow
 };
 
 // This method will be called when Electron has finished

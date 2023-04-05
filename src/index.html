@@ -2,26 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>今日头条视频获取器</title>
+    <title>今日头条视频下载工具</title>
     <link rel="stylesheet" href="index.css"/>
 </head>
 <body>
-<h1>今日头条视频下载器</h1>
+<h1>今日头条视频下载工具</h1>
 <div>
-    <div class="content">
+    <div class="form-item">
         <label for="toutiao-pc-url-input">
             视频地址
         </label><input type="text" id="toutiao-pc-url-input" name="toutiao-pc-url-input">
         <button id="toutiao-pc-url-sure-button">确定</button>
     </div>
-    <div class="content">
+    <div class="form-item">
         <label for="toutiao-video-download-location">
             下载到
         </label><input type="text" id="toutiao-video-download-location" name="toutiao-video-download-location" readonly>
         <button id="toutiao-video-download-location-choose-button">选择目录</button>
         <button id="toutiao-video-download-location-confirm-button">确定</button>
     </div>
-
+</div>
+<div class="overlay-default" id="mask">
+    <span>系统工作中，请稍后</span>
 </div>
 </body>
 <script src="render.js"></script>
@@ -50,24 +52,47 @@
             window.alert("请选择视频的下载地址")
             return;
         }
-        downloadVideoByPcUrl(pcInput.value)
+        MaskUtils.maskOn()
+        downloadVideoByPcUrl(pcInput.value).catch(err => {
+
+        }).finally(() => {
+            MaskUtils.maskOff()
+        })
     })
     locationConfirmButton.addEventListener('click', async () => {
         const folderLocation = locationInput.value
+        MaskUtils.maskOn()
         changeVideoDownloadDirectory(folderLocation).then(el => {
             // cannot use this directory for some reason
             if (!el) {
                 locationInput.value = ''
                 window.alert(`${folderLocation}无法作为下载目录`)
+                return
             }
+            window.alert(`已将${folderLocation}作为下载目录`)
         }).catch(err => {
             window.alert(`${folderLocation}无法作为下载目录:${err}`)
+        }).finally(() => {
+            MaskUtils.maskOff()
         })
     })
 </script>
 <style>
-    .content {
+    .form-item {
         padding-bottom: 10px;
+    }
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: gray;
+        z-index: 1;
+        filter:blur(5px);
+    }
+    .overlay-default {
+        display: none;
     }
 </style>
 </html>
