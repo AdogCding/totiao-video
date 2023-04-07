@@ -20,6 +20,8 @@
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "ffmpeg-static-electron": "^2.0.3",
+    "ffprobe-static-electron": "^2.0.2",
+    "fluent-ffmpeg": "^2.1.2",
     "https": "^1.0.0",
     "node-wget": "^0.4.3",
     "puppeteer-core": "^19.7.5",

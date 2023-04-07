@@ -17,7 +17,7 @@
     <div class="form-item">
         <label for="toutiao-video-download-location">
             下载到
-        </label><input type="text" id="toutiao-video-download-location" name="toutiao-video-download-location" readonly>
+        </label><input type="text" id="toutiao-video-download-location" aria-readonly="true" name="toutiao-video-download-location" readonly>
         <button id="toutiao-video-download-location-choose-button">选择目录</button>
         <button id="toutiao-video-download-location-confirm-button">确定</button>
     </div>
@@ -49,7 +49,7 @@
             return
         }
         if (!locationInput.value) {
-            window.alert("请选择视频的下载地址")
+            window.alert("请选择视频的下载目录")
             return;
         }
         MaskUtils.maskOn()

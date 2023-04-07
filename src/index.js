@@ -5,6 +5,16 @@ const pie = require("puppeteer-in-electron")
 const fs = require('fs')
 const {dialog} = require('electron')
 const wget = require('node-wget');
+const ffmpegExecutable = require('ffmpeg-static-electron')
+const ffprobe = require('ffprobe-static-electron')
+const ffmpeg = require('fluent-ffmpeg')
+ffmpeg.setFfmpegPath(ffmpegExecutable.path)
+ffmpeg.setFfprobePath(ffprobe.path)
+function mergeVideoAndAudio(video, audio) {
+
+}
+
+
 const VIDEO_DIRECTIVE = {
     DOWNLOAD_VIDEO_BY_PC_URL: "video:downloadVideoByPcUrl",
     CHANGE_VIDEO_DOWNLOAD_LOCATION: "file:changeVideoDownloadLocation",
