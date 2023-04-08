@@ -3,7 +3,7 @@
   "productName": "totiao-video",
   "version": "1.0.0",
   "description": "My Electron application description",
-  "main": "src/index.js",
+  "main": "./.webpack/main",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -25,7 +25,8 @@
     "https": "^1.0.0",
     "node-wget": "^0.4.3",
     "puppeteer-core": "^19.7.5",
-    "puppeteer-in-electron": "^3.0.5"
+    "puppeteer-in-electron": "^3.0.5",
+    "vue": "^3.2.47"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.5",
@@ -33,6 +34,13 @@
     "@electron-forge/maker-rpm": "^6.0.5",
     "@electron-forge/maker-squirrel": "^6.0.5",
     "@electron-forge/maker-zip": "^6.0.5",
-    "electron": "^23.1.4"
+    "@electron-forge/plugin-webpack": "^6.0.5",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "css-loader": "^6.7.3",
+    "electron": "^23.1.4",
+    "node-loader": "^2.0.0",
+    "style-loader": "^3.3.2",
+    "vue-loader": "^17.0.1",
+    "vue-template-compiler": "^2.7.14"
   }
 }

@@ -7,9 +7,11 @@ const {dialog} = require('electron')
 const wget = require('node-wget');
 const ffmpegExecutable = require('ffmpeg-static-electron')
 const ffprobe = require('ffprobe-static-electron')
-const ffmpeg = require('fluent-ffmpeg')
+import ffmpeg from 'fluent-ffmpeg'
 ffmpeg.setFfmpegPath(ffmpegExecutable.path)
 ffmpeg.setFfprobePath(ffprobe.path)
+const url = process.env.NODE_ENV
+console.log(url)
 function mergeVideoAndAudio(video, audio) {
 
 }
@@ -49,15 +51,15 @@ const createWindow = () => {
         width: 800,
         height: 600,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
         },
     });
     // and load the index.html of the app.
-    mainWindow.loadFile(path.join(__dirname, 'index.html')).then(() => {
+    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).then(() => {
     });
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     return mainWindow
 };
 
