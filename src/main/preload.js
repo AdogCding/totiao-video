@@ -1,7 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 const {contextBridge, ipcRenderer, ipcMain} = require('electron')
-import videoDirective from "./video/videoDirective";
+import videoDirective from "../video/videoDirective";
 
 contextBridge.exposeInMainWorld('pieApi', {
     downloadVideoByPcUrl: (url) => ipcRenderer.invoke(videoDirective.DOWNLOAD_VIDEO_BY_PC_URL, url),
@@ -9,4 +9,6 @@ contextBridge.exposeInMainWorld('pieApi', {
     chooseVideoDownloadFolder: () => ipcRenderer.invoke(videoDirective.CHOOSE_VIDEO_DOWNLOAD),
     readAppConfig: () => ipcRenderer.invoke(videoDirective.READ_APP_CONFIG),
     probeVideoFile: (fileName) => ipcRenderer.invoke(videoDirective.PROBE_FILE_FORMAT, fileName),
+    chooseFile:(target) => ipcRenderer.invoke(videoDirective.CHOOSE_EXECUTABLE, target),
+    checkAppConfig: () => ipcRenderer.invoke(videoDirective.CHECK_APP_CONFIG)
 })

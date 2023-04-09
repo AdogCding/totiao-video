@@ -1,16 +1,31 @@
 <template>
     <a-modal v-model:visible="modalVisible" :maskClosable="false" title="下载工具基础设置" ok-text="确认"
              cancel-text="取消" @ok="hideLightConfigModal">
-        <a-row>
+        <a-row class="row-gap">
             <a-input-group>
                 <a-space>
-                    <a-input :readOnly="true" v-model:value="downloadDirectory"/>
+                    <a-input addon-before="下载目录" :readOnly="true" v-model:value="downloadDirectory"/>
                     <a-button type="primary" @click="chooseDirectory">选择目录</a-button>
                     <a-button type="primary" @click="confirmDirectory">确认目录是否可用</a-button>
                 </a-space>
             </a-input-group>
         </a-row>
-
+        <a-row class="row-gap">
+            <a-input-group>
+                <a-space>
+                    <a-input addon-before="ffmpeg位置" :readOnly="true" v-model:value="ffmpegLocation"/>
+                    <a-button type="primary" @click="chooseFfmpegExe">选择文件</a-button>
+                </a-space>
+            </a-input-group>
+        </a-row>
+        <a-row class="row-gap">
+            <a-input-group>
+                <a-space>
+                    <a-input addon-before="ffmprobe位置" :readOnly="true" v-model:value="ffprobeLocation"/>
+                    <a-button type="primary" @click="chooseFfprobeExe">选择文件</a-button>
+                </a-space>
+            </a-input-group>
+        </a-row>
     </a-modal>
     <a-layout style="background: white">
         <a-row>
@@ -56,7 +71,7 @@ import {
     downloadVideoByPcUrl,
     isToutiaoUrl,
     changeVideoDownloadDirectory,
-    explainDownloadError, readAppConfig, probeVideoFile
+    explainDownloadError, readAppConfig, probeVideoFile, chooseFile,checkAppConfig
 } from '../render'
 
 export default {
@@ -68,6 +83,8 @@ export default {
         return {
             videoUrl: "",
             downloadDirectory: "",
+            ffmpegLocation:"",
+            ffprobeLocation:"",
             modalVisible: false,
         }
     },
@@ -86,6 +103,8 @@ export default {
             try {
                 const config = await readAppConfig()
                 this.downloadDirectory = config.videoLocation
+                this.ffprobeLocation = config.ffprobeLocation
+                this.ffmpegLocation = config.ffmpegLocation
             } catch (err) {
                 console.error(err)
                 modal.update({
@@ -124,9 +143,17 @@ export default {
                 })
                 return
             }
+            const [isAppConfigAppropriate, message] = await checkAppConfig()
+            if (!isAppConfigAppropriate) {
+                this.$warning({
+                    title:"系统消息",
+                    content: `${message}配置不正确`
+                })
+                return
+            }
             const modal = this.$info({
                 title: '系统消息',
-                content: "下载中,请稍后",
+                content: "下载中,请稍后...",
                 okButtonProps: {
                     disabled: true
                 },
@@ -162,6 +189,12 @@ export default {
         },
         confirmDirectory() {
             changeVideoDownloadDirectory(this.downloadDirectory)
+        },
+        async chooseFfmpegExe() {
+            this.ffmpegLocation = await chooseFile('ffmpeg')
+        },
+        async chooseFfprobeExe() {
+            this.ffmpegLocation = await chooseFile('ffprobe')
         }
     }
 }
@@ -172,7 +205,9 @@ export default {
     background: white;
     padding: 10% 10%;
 }
-
+.row-gap {
+    padding: 10px 10px;
+}
 .content {
     padding: 10px 10px;
     background: white;

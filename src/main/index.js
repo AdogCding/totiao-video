@@ -2,14 +2,24 @@ const {app, BrowserWindow, ipcMain} = require('electron');
 const puppeteer = require('puppeteer-core')
 const pie = require("puppeteer-in-electron")
 const fs = require('fs')
+const path = require('path')
 const {dialog} = require('electron')
 const wget = require('node-wget');
-const ffmpegExecutable = require('ffmpeg-static-electron')
-const ffprobe = require('ffprobe-static-electron')
+
+import ffmpegExecutable from 'ffmpeg-static-electron'
+import ffprobeExecutable from 'ffprobe-static-electron'
 import ffmpeg from 'fluent-ffmpeg'
-console.log(ffmpegExecutable, ffprobe)
-ffmpeg.setFfmpegPath(ffmpegExecutable.path)
-ffmpeg.setFfprobePath(ffprobe.path)
+
+console.log(ffmpegExecutable, ffprobeExecutable)
+
+const appConfig = {
+    videoLocation:app.getPath('userData'),
+    ffprobeLocation:ffprobeExecutable.path,
+    ffmpegLocation: ffmpegExecutable.path,
+}
+
+ffmpeg.setFfmpegPath(appConfig.ffmpegLocation)
+ffmpeg.setFfprobePath(appConfig.ffprobeLocation)
 
 async function probVideoFormat(video) {
     return new Promise((resolve, reject) => {
@@ -23,12 +33,10 @@ async function probVideoFormat(video) {
     })
 
 }
-import VIDEO_DIRECTIVE from './video/videoDirective'
+import VIDEO_DIRECTIVE from '../video/videoDirective'
 
-const appConfig = {
-    videoLocation:app.getPath('userData')
-}
-import VIDEO_DOWNLOAD_ERROR from './video/videoStdError'
+
+import VIDEO_DOWNLOAD_ERROR from '../video/videoStdError'
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -101,9 +109,7 @@ function initPuppeteer() {
 
 async function canVideoDownloadDirectlyFromPage(initPage) {
     const srcUrlStr = await initPage.$eval("video", el => el.getAttribute('src'))
-    const srcUrl = new URL(srcUrlStr)
-    return srcUrl.protocol !== 'blob:';
-
+    return [!srcUrlStr.startsWith('blob'), srcUrlStr];
 }
 
 async function getVideoUrlSet(initPage, urlSize) {
@@ -123,8 +129,22 @@ async function getVideoUrlSet(initPage, urlSize) {
             }
         })
     })
-
 }
+
+/**
+ * ffmpeg可执行文件地址
+ */
+function chooseFfmpegLocation({ffmpegLocation, ffprobeLocation}) {
+    if (!ffprobeLocation) {
+        throw Error()
+    }
+    if (!ffprobeLocation) {
+        throw Error()
+    }
+    appConfig.ffmpegLocation = ffmpegLocation
+    appConfig.ffprobeLocation = ffprobeLocation
+}
+
 
 async function downloadByUrlStr(urlStr, fileName) {
     return new Promise((resolve, reject) => {
@@ -135,7 +155,25 @@ async function downloadByUrlStr(urlStr, fileName) {
             resolve('success')
         })
     })
+}
 
+function checkAppConfig() {
+    try {
+        const videoLocationCheckRes = checkVideoDownloadLocation(appConfig.videoLocation)
+        if (!videoLocationCheckRes) {
+            return [false, 'videoLocation']
+        }
+
+    } catch (err) {
+        return [false, 'videoLocation']
+    }
+    if (!appConfig.ffprobeLocation) {
+        return [false, 'ffprobeLocation']
+    }
+    if (!appConfig.ffmpegLocation) {
+        return [false, 'ffmpegLocation']
+    }
+    return [true]
 }
 
 function checkVideoDownloadLocation(directory) {
@@ -163,9 +201,38 @@ function createFileNameFromTitle(title) {
 }
 
 function bindVideoDirectives(pBrowser, ipcMain, mainWin) {
-    ipcMain.handle(VIDEO_DIRECTIVE.CHOOSE_VIDEO_DOWNLOAD, async (evt) => {
+    ipcMain.handle(VIDEO_DIRECTIVE.CHECK_APP_CONFIG, async () => {
+        return checkAppConfig()
+    })
+    ipcMain.handle(VIDEO_DIRECTIVE.CHOOSE_EXECUTABLE, async (_, target) => {
+        const {cancel, filePaths} = await dialog.showOpenDialog(mainWin,{
+            properties:['openFile'],
+            filters:[
+                {
+                    name:'Executable',
+                    extensions:['exe']
+                },
+                {
+                    name:'All Files',
+                    extensions:['*']
+                }
+            ]
+        })
+        if (cancel) {
+            return ''
+        }
+        if (target === 'ffmpeg') {
+            appConfig.ffmpegLocation = filePaths[0]
+        } else if (target === 'ffprobe') {
+            appConfig.ffprobeLocation = filePaths[0]
+        } else {
+            throw Error()
+        }
+        return filePaths[0]
+    })
+    ipcMain.handle(VIDEO_DIRECTIVE.CHOOSE_VIDEO_DOWNLOAD, async () => {
         const {canceled, filePaths} = await dialog.showOpenDialog(mainWin, {
-            properties: ['openDirectory']
+            properties: ['openDirectory'],
         })
         if (canceled) {
             return ''
@@ -173,39 +240,46 @@ function bindVideoDirectives(pBrowser, ipcMain, mainWin) {
         appConfig.videoLocation = filePaths[0]
         return filePaths[0]
     })
-    ipcMain.handle(VIDEO_DIRECTIVE.PROBE_FILE_FORMAT, async (event, fileName) => {
+    ipcMain.handle(VIDEO_DIRECTIVE.PROBE_FILE_FORMAT, async (_, fileName) => {
         return probVideoFormat(fileName)
     })
-    ipcMain.handle(VIDEO_DIRECTIVE.DOWNLOAD_VIDEO_BY_PC_URL, async (event, urlStr) => {
+    ipcMain.handle(VIDEO_DIRECTIVE.DOWNLOAD_VIDEO_BY_PC_URL, async (_, urlStr) => {
         const backendWin = new BrowserWindow({
-            show: false
+            show: true
         })
         backendWin.webContents.setAudioMuted(true)
+        let urlStrList = []
+        let mediaFileList = []
         try {
             await backendWin.loadURL(urlStr)
             const initPage = await pie.getPage(pBrowser, backendWin)
             const title = await initPage.title()
-            const canBeDownloadDirectly = await canVideoDownloadDirectlyFromPage(initPage)
-            const urlSet = await getVideoUrlSet(initPage, canBeDownloadDirectly ? 1 : 2)
-            const urlStrList = Array.from(urlSet)
-            const [mediaFilePath, mediaFilePathAnother] = [createFileNameFromTitle(title), createFileNameFromTitle(`${title}-1`)]
-            if (urlSet.size === 1) {
-                await downloadByUrlStr(urlStrList[0], mediaFilePath)
-                return [mediaFilePath]
+            mediaFileList = [createFileNameFromTitle(title), createFileNameFromTitle(`${title}-1`)]
+            const [canBeDownloadDirectly, videoSrcUrlStr] = await canVideoDownloadDirectlyFromPage(initPage)
+            if (canBeDownloadDirectly) {
+                urlStrList = [videoSrcUrlStr.startsWith("https") ? videoSrcUrlStr : `https:${videoSrcUrlStr}`]
             } else {
-                await downloadByUrlStr(urlStrList[0], mediaFilePath)
-                await downloadByUrlStr(urlStrList[1], mediaFilePathAnother)
-                return [mediaFilePath, mediaFilePathAnother]
+                const urlSet = await getVideoUrlSet(initPage, 2)
+                urlStrList = Array.from(urlSet)
             }
         } finally {
             backendWin.destroy()
         }
-
+        if (urlStrList.length === 0 || mediaFileList.length === 0) {
+            throw Error()
+        }
+        if (urlStrList.length === 1) {
+            await downloadByUrlStr(urlStrList[0], mediaFileList[0])
+        } else {
+            await downloadByUrlStr(urlStrList[0], mediaFileList[0])
+            await downloadByUrlStr(urlStrList[1], mediaFileList[1])
+        }
+        return mediaFileList
     })
-    ipcMain.handle(VIDEO_DIRECTIVE.CHANGE_VIDEO_DOWNLOAD_LOCATION, async (event, newLocation) => {
+    ipcMain.handle(VIDEO_DIRECTIVE.CHANGE_VIDEO_DOWNLOAD_LOCATION, async (_, newLocation) => {
         return checkVideoDownloadLocation(newLocation);
     })
-    ipcMain.handle(VIDEO_DIRECTIVE.READ_APP_CONFIG, async (event) => {
+    ipcMain.handle(VIDEO_DIRECTIVE.READ_APP_CONFIG, async () => {
         return {...appConfig}
     })
 }

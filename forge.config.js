@@ -32,7 +32,7 @@ module.exports = {
               js: './src/render/main.js',
               name: 'main_window',
               preload: {
-                js: './src/preload.js',
+                js: './src/main/preload.js',
               },
             },
           ],

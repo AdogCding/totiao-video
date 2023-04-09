@@ -38,4 +38,22 @@ async function readAppConfig() {
 async function probeVideoFile(fileName) {
     return window.pieApi.probeVideoFile(fileName)
 }
-export {chooseDirectory, changeVideoDownloadDirectory, downloadVideoByPcUrl, isToutiaoUrl, explainDownloadError, readAppConfig, probeVideoFile}
+
+async function chooseFile(target) {
+    return window.pieApi.chooseFile(target)
+}
+
+async function checkAppConfig() {
+    return window.pieApi.checkAppConfig()
+}
+
+export {chooseDirectory,
+    changeVideoDownloadDirectory,
+    downloadVideoByPcUrl,
+    isToutiaoUrl,
+    explainDownloadError,
+    readAppConfig,
+    probeVideoFile,
+    chooseFile,
+    checkAppConfig
+}
