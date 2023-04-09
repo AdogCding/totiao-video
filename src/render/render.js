@@ -1,5 +1,7 @@
 
-
+import VIDEO_DOWNLOAD_ERROR from '../video/videoStdError'
+import VideoStdError from "../video/videoStdError";
+import videoStdErrors from "../video/videoStdError";
 function isToutiaoUrl(urlStr) {
     try {
         const url = new URL(urlStr)
@@ -9,33 +11,6 @@ function isToutiaoUrl(urlStr) {
     }
 }
 
-class MaskUtils {
-    static MASK_STYLE_DEFAULT_CLASS_NAME = "overlay-default"
-    static MASK_STYLE_CLASS_NAME = "overlay"
-    static maskOn() {
-        const maskDiv = document.getElementById('mask')
-        maskDiv.classList.remove(this.MASK_STYLE_DEFAULT_CLASS_NAME)
-        maskDiv.classList.toggle(this.MASK_STYLE_CLASS_NAME)
-    }
-    static maskOff() {
-        const maskDiv = document.getElementById('mask')
-        maskDiv.classList.add(this.MASK_STYLE_DEFAULT_CLASS_NAME)
-        maskDiv.classList.toggle(this.MASK_STYLE_CLASS_NAME)
-    }
-}
-
-class ButtonUtils {
-    static disableButtons(buttons) {
-        for (const btn of buttons) {
-            btn.disabled = true
-        }
-    }
-    static activeButtons(buttons) {
-        for (const btn of buttons) {
-            btn.disabled = false
-        }
-    }
-}
 
 
 async function downloadVideoByPcUrl(url) {
@@ -50,3 +25,17 @@ async function chooseDirectory() {
     return window.pieApi.chooseVideoDownloadFolder()
 }
 
+function explainDownloadError(error) {
+    const {message} = error
+    const [matchedError] = Object.values(videoStdErrors).filter(err => message.indexOf(err.message) !== -1)
+    return matchedError ? matchedError.explain : "未知错误，请联系开发者"
+}
+
+async function readAppConfig() {
+    return window.pieApi.readAppConfig()
+}
+
+async function probeVideoFile(fileName) {
+    return window.pieApi.probeVideoFile(fileName)
+}
+export {chooseDirectory, changeVideoDownloadDirectory, downloadVideoByPcUrl, isToutiaoUrl, explainDownloadError, readAppConfig, probeVideoFile}

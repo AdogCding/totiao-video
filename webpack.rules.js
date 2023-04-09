@@ -24,7 +24,14 @@ module.exports = [
     test: /\.css$/,
     use: [
       'vue-style-loader',
-      'css-loader'
+      'css-loader',
+    ]
+  },
+  {
+    test:/\.less$/,
+    use:[
+        'vue-style-loader',
+        'less-loader'
     ]
   }
   // Put your webpack loader rules in this array.  This is where you would put
