@@ -127,13 +127,14 @@ export default {
         showConvert(singleMediaFile) {
             const modal = this.$success({
                 title:"系统消息",
-                content:(h) => h('p','I love you')
+                content:h('div', [h('span', singleMediaFile)])
             })
         },
         async showOptionsAfterDownload(m1, m2) {
-            const res = await probeVideoFile(m1)
-            const res2 = await probeVideoFile(m2)
-            console.log(res, res2)
+            this.$success({
+                title:"系统消息-下载完成",
+                content:h('div', [h('div', m1), h('div', m2)])
+            })
         },
         async downloadVideo() {
             if (!isToutiaoUrl(this.videoUrl)) {
@@ -163,6 +164,7 @@ export default {
             })
             try {
                 const files = await downloadVideoByPcUrl(this.videoUrl)
+                modal.destroy()
                 if (files.length === 1) {
                     this.showConvert(files[0])
                 } else {
@@ -170,18 +172,14 @@ export default {
                 }
             } catch (err) {
                 modal.update({
-                    content: `下载失败, ${explainDownloadError(err)}`
-                })
-            } finally {
-                modal.update({
-                        okButtonProps: {
-                            disabled: false
-                        },
-                        cancelButtonProps: {
-                            disabled: false
-                        }
+                    content: `下载失败, ${explainDownloadError(err)}`,
+                    okButtonProps: {
+                        disabled: false
+                    },
+                    cancelButtonProps: {
+                        disabled: false
                     }
-                )
+                })
             }
         },
         async chooseDirectory() {

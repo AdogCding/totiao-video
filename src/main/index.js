@@ -245,7 +245,7 @@ function bindVideoDirectives(pBrowser, ipcMain, mainWin) {
     })
     ipcMain.handle(VIDEO_DIRECTIVE.DOWNLOAD_VIDEO_BY_PC_URL, async (_, urlStr) => {
         const backendWin = new BrowserWindow({
-            show: true
+            show: false
         })
         backendWin.webContents.setAudioMuted(true)
         let urlStrList = []
