@@ -16,6 +16,8 @@ module.exports = {
     ],
     externals:{
         bufferutil: "bufferutil",
-        "utf-8-validate": "utf-8-validate"
+        "utf-8-validate": "utf-8-validate",
+        "ffmpeg-static-electron":"ffmpeg-static-electron",
+        "ffprobe-static-electron":"ffprobe-static-electron"
     }
 };

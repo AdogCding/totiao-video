@@ -135,6 +135,7 @@ export default {
                 title:"系统消息-下载完成",
                 content:h('div', [h('div', m1), h('div', m2)])
             })
+            this.probeVideoFormat(m1)
         },
         async downloadVideo() {
             if (!isToutiaoUrl(this.videoUrl)) {
@@ -193,6 +194,14 @@ export default {
         },
         async chooseFfprobeExe() {
             this.ffmpegLocation = await chooseFile('ffprobe')
+        },
+        async probeVideoFormat(fileName) {
+            const videoMeta = await probeVideoFile(fileName)
+            return videoMeta["streams"]?.map(stream => {
+                return {
+                    "type":stream["codec_type"]
+                }
+            })
         }
     }
 }

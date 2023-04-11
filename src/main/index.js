@@ -6,20 +6,19 @@ const path = require('path')
 const {dialog} = require('electron')
 const wget = require('node-wget');
 
-import ffmpegExecutable from 'ffmpeg-static-electron'
-import ffprobeExecutable from 'ffprobe-static-electron'
-import ffmpeg from 'fluent-ffmpeg'
-
-console.log(ffmpegExecutable, ffprobeExecutable)
-
+const ffmpegExecutable = require('ffmpeg-static-electron')
+const ffprobeExecutable = require('ffprobe-static-electron')
+const ffmpeg =  require('fluent-ffmpeg')
 const appConfig = {
     videoLocation:app.getPath('userData'),
     ffprobeLocation:ffprobeExecutable.path,
     ffmpegLocation: ffmpegExecutable.path,
 }
-
 ffmpeg.setFfmpegPath(appConfig.ffmpegLocation)
 ffmpeg.setFfprobePath(appConfig.ffprobeLocation)
+
+
+
 
 async function probVideoFormat(video) {
     return new Promise((resolve, reject) => {
@@ -33,6 +32,7 @@ async function probVideoFormat(video) {
     })
 
 }
+
 import VIDEO_DIRECTIVE from '../video/videoDirective'
 
 
@@ -130,22 +130,6 @@ async function getVideoUrlSet(initPage, urlSize) {
         })
     })
 }
-
-/**
- * ffmpeg可执行文件地址
- */
-function chooseFfmpegLocation({ffmpegLocation, ffprobeLocation}) {
-    if (!ffprobeLocation) {
-        throw Error()
-    }
-    if (!ffprobeLocation) {
-        throw Error()
-    }
-    appConfig.ffmpegLocation = ffmpegLocation
-    appConfig.ffprobeLocation = ffprobeLocation
-}
-
-
 async function downloadByUrlStr(urlStr, fileName) {
     return new Promise((resolve, reject) => {
         wget({url: urlStr, dest: fileName}, (error) => {
