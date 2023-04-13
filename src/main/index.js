@@ -19,15 +19,20 @@ ffmpeg.setFfprobePath(appConfig.ffprobeLocation)
 
 
 
-
 async function probVideoFormat(video) {
+    const resolveStreams = (streams) => {
+        if (streams.length > 1) {
+            return 'mix'
+        }
+        return streams[0]?.["codec_type"]
+    }
     return new Promise((resolve, reject) => {
         ffmpeg(video).ffprobe(0, function(err, data){
             if (err) {
                 reject(err)
                 return
             }
-            resolve(data)
+            resolve(resolveStreams(data["streams"]))
         })
     })
 
@@ -266,4 +271,8 @@ function bindVideoDirectives(pBrowser, ipcMain, mainWin) {
     ipcMain.handle(VIDEO_DIRECTIVE.READ_APP_CONFIG, async () => {
         return {...appConfig}
     })
+}
+
+function deleteFiles(fileName) {
+    fs.unlinkSync(fileName)
 }
