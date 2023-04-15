@@ -161,7 +161,6 @@ export default {
                 if (!files || files.length === 0) {
                     throw Error("fail downlaod")
                 }
-                console.log(files)
                 if (files.length === 1) {
                     await this.showConvert({
                         fileName: files[0],

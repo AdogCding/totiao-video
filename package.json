@@ -20,6 +20,7 @@
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
     "ant-design-vue": "^3.2.17",
+    "electron-log": "^4.4.8",
     "electron-squirrel-startup": "^1.0.0",
     "ffmpeg-static-electron": "^2.0.3",
     "ffprobe-static-electron": "^2.0.2",

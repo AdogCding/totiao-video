@@ -5,14 +5,16 @@ const fs = require('fs')
 const path = require('path')
 const {dialog} = require('electron')
 const wget = require('node-wget');
+const log = require('electron-log');
+console.log = log.log
+console.error = log.error
 
-const ffmpegExecutable = require('ffmpeg-static-electron')
-const ffprobeExecutable = require('ffprobe-static-electron')
+
 const ffmpeg =  require('fluent-ffmpeg')
 const appConfig = {
     videoLocation:app.getPath('userData'),
-    ffprobeLocation:ffprobeExecutable.path,
-    ffmpegLocation: ffmpegExecutable.path,
+    ffprobeLocation:'',
+    ffmpegLocation:'',
 }
 ffmpeg.setFfmpegPath(appConfig.ffmpegLocation)
 ffmpeg.setFfprobePath(appConfig.ffprobeLocation)
@@ -214,8 +216,10 @@ function bindVideoDirectives(pBrowser, ipcMain, mainWin) {
         }
         if (target === 'ffmpeg') {
             appConfig.ffmpegLocation = filePaths[0]
+            ffmpeg.setFfmpegPath(appConfig.ffmpegLocation)
         } else if (target === 'ffprobe') {
             appConfig.ffprobeLocation = filePaths[0]
+            ffmpeg.setFfprobePath(appConfig.ffprobeLocation)
         } else {
             throw Error()
         }
