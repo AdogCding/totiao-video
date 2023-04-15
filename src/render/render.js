@@ -47,6 +47,18 @@ async function checkAppConfig() {
     return window.pieApi.checkAppConfig()
 }
 
+async function deleteFile(file) {
+    return window.pieApi.deleteFile(file)
+}
+
+async function mergeDownloadFiles(audio, video) {
+    return window.pieApi.mergeDownloadFiles(audio, video)
+}
+
+async function transferVideoToMp3(mediaFile){
+     return window.pieApi.transferVideoToMp3(mediaFile)
+}
+
 export {chooseDirectory,
     changeVideoDownloadDirectory,
     downloadVideoByPcUrl,
@@ -55,5 +67,8 @@ export {chooseDirectory,
     readAppConfig,
     probeVideoFile,
     chooseFile,
-    checkAppConfig
+    checkAppConfig,
+    mergeDownloadFiles,
+    transferVideoToMp3,
+    deleteFile
 }

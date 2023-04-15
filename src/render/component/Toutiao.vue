@@ -1,6 +1,6 @@
 <template>
-    <a-modal v-model:visible="kitchenModalVisible" :mask-closable="false" title="视频已下载完成" ok-text="确认"
-             cancel-text="取消" @ok="hideKitchenModal">
+    <a-modal v-model:visible="kitchenModalVisible" :mask-closable="false" title="视频操作区" ok-text="确认"
+             cancel-text="取消" @ok="hideKitchenModal" width="600">
         <toutiao-video-kitchen :video-file-names="fileNameList"></toutiao-video-kitchen>
     </a-modal>
     <a-modal v-model:visible="configModalVisible" :maskClosable="false" title="下载工具基础设置" ok-text="确认"
@@ -97,7 +97,7 @@ export default {
             this.fileNameList = []
         },
         showConvert(singleMediaFile) {
-            const modal = this.$success({
+            this.$success({
                 title: "系统消息",
                 content: h('div', [h('span', singleMediaFile['fileName'])]),
                 onOk:() => {
@@ -144,14 +144,29 @@ export default {
                     disabled: true
                 }
             })
+            setTimeout(() => {
+                modal.update({
+                    content:"下载时间过长，请检查网络",
+                    okButtonProps: {
+                        disabled: false
+                    },
+                    cancelButtonProps: {
+                        disabled: false
+                    }
+                })
+            },60000)
             try {
                 const files = await downloadVideoByPcUrl(this.videoUrl)
                 modal.destroy()
                 if (!files || files.length === 0) {
                     throw Error("fail downlaod")
                 }
+                console.log(files)
                 if (files.length === 1) {
-                    await this.showConvert({fileName: files[0], type: await this.probeVideoFormat(files[0])})
+                    await this.showConvert({
+                        fileName: files[0],
+                        type: await this.probeVideoFormat(files[0])
+                    })
                 } else {
                     await this.showOptionsAfterDownload({
                             fileName: files[0],

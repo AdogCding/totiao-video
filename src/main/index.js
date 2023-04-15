@@ -17,6 +17,11 @@ const appConfig = {
 ffmpeg.setFfmpegPath(appConfig.ffmpegLocation)
 ffmpeg.setFfprobePath(appConfig.ffprobeLocation)
 
+import VIDEO_DIRECTIVE from '../video/videoDirective'
+
+
+import VIDEO_DOWNLOAD_ERROR from '../video/videoStdError'
+
 
 
 async function probVideoFormat(video) {
@@ -38,10 +43,7 @@ async function probVideoFormat(video) {
 
 }
 
-import VIDEO_DIRECTIVE from '../video/videoDirective'
 
-
-import VIDEO_DOWNLOAD_ERROR from '../video/videoStdError'
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -259,11 +261,12 @@ function bindVideoDirectives(pBrowser, ipcMain, mainWin) {
         }
         if (urlStrList.length === 1) {
             await downloadByUrlStr(urlStrList[0], mediaFileList[0])
+            return [mediaFileList[0]]
         } else {
             await downloadByUrlStr(urlStrList[0], mediaFileList[0])
             await downloadByUrlStr(urlStrList[1], mediaFileList[1])
+            return mediaFileList
         }
-        return mediaFileList
     })
     ipcMain.handle(VIDEO_DIRECTIVE.CHANGE_VIDEO_DOWNLOAD_LOCATION, async (_, newLocation) => {
         return checkVideoDownloadLocation(newLocation);
@@ -271,8 +274,42 @@ function bindVideoDirectives(pBrowser, ipcMain, mainWin) {
     ipcMain.handle(VIDEO_DIRECTIVE.READ_APP_CONFIG, async () => {
         return {...appConfig}
     })
+    ipcMain.handle(VIDEO_DIRECTIVE.TRANSFER_TO_MP3, (_, fileName) => {
+        const filePath = path.parse(fileName)
+        const output = `${path.join(filePath.dir, filePath.name)}.mp3`
+        return transformMp4ToMp3(fileName, output)
+    })
+    ipcMain.handle(VIDEO_DIRECTIVE.DELETE_FILE, (_, fileName) => {
+        return deleteFiles(fileName)
+    })
+    ipcMain.handle(VIDEO_DIRECTIVE.MERGE_TO_ONE, (_, audio, video) => {
+        const filePath = path.parse(audio)
+        const output = `${path.join(filePath.dir, filePath.name)}.mix.mp4`
+        return mergeAudioAndVideo(audio, video, output)
+    })
 }
 
 function deleteFiles(fileName) {
     fs.unlinkSync(fileName)
 }
+
+/**
+ * There is an important presumptions,
+ * only one audio stream is available.
+ * use fluent-ffmpeg translate a command line to function call
+ * e.g. ffmpeg -i inputFileName -map 0:a outputFileName
+ * -i specified input file
+ * -map 0:a manually select all audio streams from first input media file
+ * @param inputFileName
+ * @param outputFileName
+ * @param inputFileName
+ * @param outputFileName
+ */
+function transformMp4ToMp3(inputFileName, outputFileName) {
+    ffmpeg(inputFileName).addOption("-map 0:a").output(outputFileName).run()
+}
+
+function mergeAudioAndVideo(audio, video, output) {
+    ffmpeg(audio).addInput(video).addOption("-c copy").output(output).run()
+}
+

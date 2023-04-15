@@ -10,5 +10,8 @@ contextBridge.exposeInMainWorld('pieApi', {
     readAppConfig: () => ipcRenderer.invoke(videoDirective.READ_APP_CONFIG),
     probeVideoFile: (fileName) => ipcRenderer.invoke(videoDirective.PROBE_FILE_FORMAT, fileName),
     chooseFile:(target) => ipcRenderer.invoke(videoDirective.CHOOSE_EXECUTABLE, target),
-    checkAppConfig: () => ipcRenderer.invoke(videoDirective.CHECK_APP_CONFIG)
+    checkAppConfig: () => ipcRenderer.invoke(videoDirective.CHECK_APP_CONFIG),
+    deleteFile: (fileName) => ipcRenderer.invoke(videoDirective.DELETE_FILE, fileName),
+    mergeDownloadFiles : (audio, video) => ipcRenderer.invoke(videoDirective.MERGE_TO_ONE, audio, video),
+    transferVideoToMp3: (file) => ipcRenderer.invoke(videoDirective.TRANSFER_TO_MP3,file)
 })
